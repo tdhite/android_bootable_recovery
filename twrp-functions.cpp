@@ -52,6 +52,7 @@
 
 extern "C" {
 	#include "libcrecovery/common.h"
+	#include "cutils/properties.h"
 }
 
 /* Execute a command */
@@ -1111,6 +1112,10 @@ void TWFunc::Fixup_Time_On_Boot()
 
 	settimeofday(&tv, NULL);
 #endif
+}
+
+void TWFunc::SetPerformanceMode(bool mode) {
+	property_set("recovery.perf.mode", mode ? "1" : "0");
 }
 
 #endif // ndef BUILD_TWRPTAR_MAIN

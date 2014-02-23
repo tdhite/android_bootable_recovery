@@ -312,6 +312,8 @@ void* GUIAction::thread_start(void *cookie)
 void GUIAction::operation_start(const string operation_name)
 {
 	time(&Start);
+	gui_print("Setting performance mode ON.\n");
+	TWFunc::SetPerformanceMode(true);
 	DataManager::SetValue(TW_ACTION_BUSY, 1);
 	DataManager::SetValue("ui_progress", 0);
 	DataManager::SetValue("tw_operation", operation_name);
@@ -344,6 +346,10 @@ void GUIAction::operation_end(const int operation_status, const int simulate)
 	blankTimer.resetTimerAndUnblank();
 #endif
 	time(&Stop);
+
+	gui_print("Setting performance mode OFF.\n");
+	TWFunc::SetPerformanceMode(false);
+
 	if ((int) difftime(Stop, Start) > 10)
 		DataManager::Vibrate("tw_action_vibrate");
 }
