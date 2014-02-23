@@ -611,20 +611,27 @@ bool TWPartitionManager::Backup_Partition(TWPartition* Part, string Backup_Folde
 	pos = section_time / (float) total_time;
 	DataManager::ShowProgress(pos, section_time);
 
+	TWFunc::SetPerformanceMode(true);
 	time(&start);
 
 	if (Part->Backup(Backup_Folder)) {
+		bool md5Success = false;
+
 		if (Part->Has_SubPartition) {
 			std::vector<TWPartition*>::iterator subpart;
 
 			for (subpart = Partitions.begin(); subpart != Partitions.end(); subpart++) {
 				if ((*subpart)->Can_Be_Backed_Up && (*subpart)->Is_SubPartition && (*subpart)->SubPartition_Of == Part->Mount_Point) {
-					if (!(*subpart)->Backup(Backup_Folder))
+					if (!(*subpart)->Backup(Backup_Folder)) {
+						TWFunc::SetPerformanceMode(false);
 						return false;
+					}
 					sync();
 					sync();
-					if (!Make_MD5(generate_md5, Backup_Folder, (*subpart)->Backup_FileName))
+					if (!Make_MD5(generate_md5, Backup_Folder, (*subpart)->Backup_FileName)) {
+						TWFunc::SetPerformanceMode(false);
 						return false;
+					}
 					if (Part->Backup_Method == 1) {
 						*file_bytes_remaining -= (*subpart)->Backup_Size;
 					} else {
@@ -643,8 +650,12 @@ bool TWPartitionManager::Backup_Partition(TWPartition* Part, string Backup_Folde
 			*img_bytes_remaining -= Part->Backup_Size;
 			*img_time += backup_time;
 		}
-		return Make_MD5(generate_md5, Backup_Folder, Part->Backup_FileName);
+
+		md5Success = Make_MD5(generate_md5, Backup_Folder, Part->Backup_FileName);
+		TWFunc::SetPerformanceMode(false);
+		return md5Success;
 	} else {
+		TWFunc::SetPerformanceMode(false);
 		return false;
 	}
 }
@@ -816,21 +827,27 @@ int TWPartitionManager::Run_Backup(void) {
 
 bool TWPartitionManager::Restore_Partition(TWPartition* Part, string Restore_Name, int partition_count) {
 	time_t Start, Stop;
+	TWFunc::SetPerformanceMode(true);
 	time(&Start);
 	DataManager::ShowProgress(1.0 / (float)partition_count, 150);
-	if (!Part->Restore(Restore_Name))
+	if (!Part->Restore(Restore_Name)) {
+		TWFunc::SetPerformanceMode(false);
 		return false;
+	}
 	if (Part->Has_SubPartition) {
 		std::vector<TWPartition*>::iterator subpart;
 
 		for (subpart = Partitions.begin(); subpart != Partitions.end(); subpart++) {
 			if ((*subpart)->Is_SubPartition && (*subpart)->SubPartition_Of == Part->Mount_Point) {
-				if (!(*subpart)->Restore(Restore_Name))
+				if (!(*subpart)->Restore(Restore_Name)) {
+					TWFunc::SetPerformanceMode(false);
 					return false;
+				}
 			}
 		}
 	}
 	time(&Stop);
+	TWFunc::SetPerformanceMode(false);
 	gui_print("[%s done (%d seconds)]\n\n", Part->Backup_Display_Name.c_str(), (int)difftime(Stop, Start));
 	return true;
 }

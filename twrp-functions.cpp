@@ -1115,7 +1115,15 @@ void TWFunc::Fixup_Time_On_Boot()
 }
 
 void TWFunc::SetPerformanceMode(bool mode) {
-	property_set("recovery.perf.mode", mode ? "1" : "0");
+	if (mode) {
+		gui_print("Setting performance mode ON.\n");
+		property_set("recovery.perf.mode", "1");
+	} else {
+		gui_print("Setting performance mode OFF.\n");
+		property_set("recovery.perf.mode", "0");
+	}
+	// Some time for events to catch up to init handlers
+	usleep(500000);
 }
 
 #endif // ndef BUILD_TWRPTAR_MAIN

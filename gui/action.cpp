@@ -312,8 +312,6 @@ void* GUIAction::thread_start(void *cookie)
 void GUIAction::operation_start(const string operation_name)
 {
 	time(&Start);
-	gui_print("Setting performance mode ON.\n");
-	TWFunc::SetPerformanceMode(true);
 	DataManager::SetValue(TW_ACTION_BUSY, 1);
 	DataManager::SetValue("ui_progress", 0);
 	DataManager::SetValue("tw_operation", operation_name);
@@ -346,9 +344,6 @@ void GUIAction::operation_end(const int operation_status, const int simulate)
 	blankTimer.resetTimerAndUnblank();
 #endif
 	time(&Stop);
-
-	gui_print("Setting performance mode OFF.\n");
-	TWFunc::SetPerformanceMode(false);
 
 	if ((int) difftime(Stop, Start) > 10)
 		DataManager::Vibrate("tw_action_vibrate");
@@ -754,7 +749,9 @@ int GUIAction::doAction(Action action, int isThreaded /* = 0 */)
 				DataManager::SetValue("tw_filename", zip_queue[i]);
 				DataManager::SetValue(TW_ZIP_INDEX, (i + 1));
 
+				TWFunc::SetPerformanceMode(true);
 				ret_val = flash_zip(zip_queue[i], arg, simulate, &wipe_cache);
+				TWFunc::SetPerformanceMode(false);
 				if (ret_val != 0) {
 					gui_print("Error flashing zip '%s'\n", zip_queue[i].c_str());
 					i = 10; // Error flashing zip - exit queue
@@ -1316,10 +1313,12 @@ int GUIAction::doAction(Action action, int isThreaded /* = 0 */)
 				DataManager::GetValue("tw_restore", Restore_Path);
 				Restore_Path += "/";
 				DataManager::GetValue("tw_restore_password", Password);
+				TWFunc::SetPerformanceMode(true);
 				if (TWFunc::Try_Decrypting_Backup(Restore_Path, Password))
 					op_status = 0; // success
 				else
 					op_status = 1; // fail
+				TWFunc::SetPerformanceMode(false);
 			}
 
 			operation_end(op_status, simulate);
