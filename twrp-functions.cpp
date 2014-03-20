@@ -80,7 +80,7 @@ int TWFunc::Exec_Cmd(const string& cmd) {
 	switch(pid = fork())
 	{
 		case -1:
-			LOGERR("Exec_Cmd(): vfork failed!\n");
+			LOGERR("Exec_Cmd(): vfork failed: %d!\n", errno);
 			return -1;
 		case 0: // child
 			execl("/sbin/sh", "sh", "-c", cmd.c_str(), NULL);
@@ -273,6 +273,31 @@ unsigned long TWFunc::Get_File_Size(string Path) {
 	if (stat(Path.c_str(), &st) != 0)
 		return 0;
 	return st.st_size;
+}
+
+std::string TWFunc::Remove_Trailing_Slashes(const std::string& path, bool leaveLast)
+{
+	std::string res;
+	size_t last_idx = 0, idx = 0;
+
+	while(last_idx != std::string::npos)
+	{
+		if(last_idx != 0)
+			res += '/';
+
+		idx = path.find_first_of('/', last_idx);
+		if(idx == std::string::npos) {
+			res += path.substr(last_idx, idx);
+			break;
+		}
+
+		res += path.substr(last_idx, idx-last_idx);
+		last_idx = path.find_first_not_of('/', idx);
+	}
+
+	if(leaveLast)
+		res += '/';
+	return res;
 }
 
 #ifndef BUILD_TWRPTAR_MAIN
@@ -1019,6 +1044,10 @@ void TWFunc::Auto_Generate_Backup_Name() {
 		space_check = Backup_Name.substr(Backup_Name.size() - 1, 1);
 	}
 	DataManager::SetValue(TW_BACKUP_NAME, Backup_Name);
+	if (PartitionManager.Check_Backup_Name(false) != 0) {
+		LOGINFO("Auto generated backup name '%s' contains invalid characters, using date instead.\n", Backup_Name.c_str());
+		DataManager::SetValue(TW_BACKUP_NAME, Get_Current_Date());
+	}
 }
 
 void TWFunc::Fixup_Time_On_Boot()
@@ -1078,20 +1107,20 @@ void TWFunc::Fixup_Time_On_Boot()
 
 	if(ats_path.empty())
 	{
-		LOGERR("TWFunc::Fixup_Time: no ats files found, leaving time as-is!\n");
+		LOGINFO("TWFunc::Fixup_Time: no ats files found, leaving time as-is!\n");
 		return;
 	}
 
 	f = fopen(ats_path.c_str(), "r");
 	if(!f)
 	{
-		LOGERR("TWFunc::Fixup_Time: failed to open file %s\n", ats_path.c_str());
+		LOGINFO("TWFunc::Fixup_Time: failed to open file %s\n", ats_path.c_str());
 		return;
 	}
 
 	if(fread(&offset, sizeof(offset), 1, f) != 1)
 	{
-		LOGERR("TWFunc::Fixup_Time: failed load uint64 from file %s\n", ats_path.c_str());
+		LOGINFO("TWFunc::Fixup_Time: failed load uint64 from file %s\n", ats_path.c_str());
 		fclose(f);
 		return;
 	}
