@@ -1143,6 +1143,28 @@ void TWFunc::Fixup_Time_On_Boot()
 #endif
 }
 
+std::vector<std::string> TWFunc::Split_String(const std::string& str, const std::string& delimiter, bool removeEmpty)
+{
+	std::vector<std::string> res;
+	size_t idx = 0, idx_last = 0;
+
+	while(idx < str.size())
+	{
+		idx = str.find_first_of(delimiter, idx_last);
+		if(idx == std::string::npos)
+			idx = str.size();
+
+		if(idx-idx_last != 0 || !removeEmpty)
+			res.push_back(str.substr(idx_last, idx-idx_last));
+
+		idx_last = idx + delimiter.size();
+	}
+
+	return res;
+}
+
+#endif // ndef BUILD_TWRPTAR_MAIN
+
 void TWFunc::SetPerformanceMode(bool mode) {
 	if (mode) {
 		gui_print("Setting performance mode ON.\n");
@@ -1154,5 +1176,3 @@ void TWFunc::SetPerformanceMode(bool mode) {
 	// Some time for events to catch up to init handlers
 	usleep(500000);
 }
-
-#endif // ndef BUILD_TWRPTAR_MAIN
