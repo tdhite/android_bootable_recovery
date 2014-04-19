@@ -1163,7 +1163,6 @@ std::vector<std::string> TWFunc::Split_String(const std::string& str, const std:
 	return res;
 }
 
-#endif // ndef BUILD_TWRPTAR_MAIN
 
 void TWFunc::SetPerformanceMode(bool mode) {
 	if (mode) {
@@ -1176,3 +1175,5 @@ void TWFunc::SetPerformanceMode(bool mode) {
 	// Some time for events to catch up to init handlers
 	usleep(500000);
 }
+
+#endif // ndef BUILD_TWRPTAR_MAIN
