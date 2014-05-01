@@ -17,7 +17,7 @@
 #ifndef _VARIABLES_HEADER_
 #define _VARIABLES_HEADER_
 
-#define TW_VERSION_STR              "2.7.0.4b"
+#define TW_VERSION_STR              "2.7.0.9"
 
 #define TW_USE_COMPRESSION_VAR      "tw_use_compression"
 #define TW_FILENAME                 "tw_filename"
