@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := events.c resources.c graphics_overlay.c
+LOCAL_SRC_FILES := events.c resources.c graphics_overlay.c graphics_utils.c
 
 ifneq ($(TW_BOARD_CUSTOM_GRAPHICS),)
     LOCAL_SRC_FILES += $(TW_BOARD_CUSTOM_GRAPHICS)
@@ -81,6 +81,11 @@ endif
 ifneq ($(BOARD_USE_CUSTOM_RECOVERY_FONT),)
   LOCAL_CFLAGS += -DBOARD_USE_CUSTOM_RECOVERY_FONT=$(BOARD_USE_CUSTOM_RECOVERY_FONT)
 endif
+
+ifneq ($(TW_WHITELIST_INPUT),)
+  LOCAL_CFLAGS += -DWHITELIST_INPUT=$(TW_WHITELIST_INPUT)
+endif
+
 LOCAL_SHARED_LIBRARIES += libz libc libcutils libjpeg
 LOCAL_STATIC_LIBRARIES += libpng libpixelflinger_static
 LOCAL_MODULE_TAGS := eng
