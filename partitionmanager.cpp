@@ -647,7 +647,7 @@ bool TWPartitionManager::Backup_Partition(TWPartition* Part, string Backup_Folde
 
 			for (subpart = Partitions.begin(); subpart != Partitions.end(); subpart++) {
 				if ((*subpart)->Can_Be_Backed_Up && (*subpart)->Is_SubPartition && (*subpart)->SubPartition_Of == Part->Mount_Point) {
-					if (!(*subpart)->Backup(Backup_Folder, &total_size, &current_size))
+					if (!(*subpart)->Backup(Backup_Folder, &total_size, &current_size)) {
 						TWFunc::SetPerformanceMode(false);
 						return false;
 					}
@@ -858,7 +858,7 @@ bool TWPartitionManager::Restore_Partition(TWPartition* Part, string Restore_Nam
 	TWFunc::SetPerformanceMode(true);
 	time(&Start);
 	//DataManager::ShowProgress(1.0 / (float)partition_count, 150);
-	if (!Part->Restore(Restore_Name, total_restore_size, already_restored_size))
+	if (!Part->Restore(Restore_Name, total_restore_size, already_restored_size)) {
 		TWFunc::SetPerformanceMode(false);
 		return false;
 	}
@@ -867,7 +867,7 @@ bool TWPartitionManager::Restore_Partition(TWPartition* Part, string Restore_Nam
 
 		for (subpart = Partitions.begin(); subpart != Partitions.end(); subpart++) {
 			if ((*subpart)->Is_SubPartition && (*subpart)->SubPartition_Of == Part->Mount_Point) {
-				if (!(*subpart)->Restore(Restore_Name, total_restore_size, already_restored_size))
+				if (!(*subpart)->Restore(Restore_Name, total_restore_size, already_restored_size)) {
 					TWFunc::SetPerformanceMode(false);
 					return false;
 				}
